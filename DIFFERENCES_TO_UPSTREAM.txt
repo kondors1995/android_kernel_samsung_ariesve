@@ -1,0 +1,173 @@
+Differences to upstream for AiresVE
+
+Here are all things that need to be changed so that this kernel works on ariesve
+devices. This includes needed drivers (code and header files) and important
+kernel configuration options.
+
+============================ MSM platform support ==============================
+
+arch/arm/mach-msm/*
+include/linux/msm_adc.h
+
+configs (added or needed):
+	ARCH_MSM
+	ARCH_MSM7x30
+	ARCH_MSM_SCORPION
+	MACH_ARIESVE
+	DIAG_OVER_USB
+	SERIAL_MSM_CLOCK_CONTROL
+	SERIAL_MSM_HS
+	HZ=100
+	ION
+	ION_MSM
+	USB_EHCI_ROOT_HUB_TT
+	REMOTE_SPINLOCK_MSM
+	I2C_QUP
+	I2C_GPIO
+
+================================== Drivers =====================================
+
+PMIC8058:
+	- drivers/mfd/pmic8058.[c,h]
+	- drivers/mfd/pm8xxx-irq.c
+	- drivers/mfd/msm_ts.h
+	- include/linux/mfd/pm8xxx/*
+	- include/linux/pmic8058/*
+	- configs:
+		PMIC8058
+		MFD_PM8XXX
+		MFD_PM8XXX_IRQ
+
+PM8xxx gpio:
+	- drivers/gpio/pm8xxx-gpio.c
+	- drivers/gpio/pm8xxx-mpp.c
+	- configs:
+		GPIO_PM8XXX
+		GPIO_PM8XXX_MPP
+
+Battery:
+	- drivers/power/ariesve_battery.c
+	- configs:
+		BATTERY_ARIESVE
+		MAX17043_FUEL_GAUGE
+
+MSM_v1 gpio:
+	- drivers/gpio/gpio-msm-v1.c
+	- configs:
+		GPIO_MSM_V1
+
+Marimba:
+	- drivers/mfd/marimba*
+	- drivers/mfd/msm-adie-codec.[c,h]
+	- configs:
+		MARIMBA_CORE
+		MARIMBA_CODEC
+
+Bluetooth:
+	- configs:
+		BT_HCIUART_H4
+		BT_HCIUART_QCA
+		MSM_BT_POWER
+
+Sensors:
+	- drivers/sensors_ariesve/*
+	- configs:
+		SENSORS_BMA222_ACCEL
+		INPUT_BMA222_POSITION=3
+		SENSORS_YAS529_MAGNETIC
+		INPUT_YAS529_POSITION=7
+		SENSORS_ORIENTATION
+		OPTICAL_GP2A
+
+Framebuffer device:
+	- drivers/video/fbdev/msm_fb.c
+	- drivers/video/fbdev/tvenc.h
+	- include/video/msm_fb[_def,_panel].h
+	- configs:
+		FB_MSM
+		FB_MSM_TRIPLE_BUFFER
+		FB_MSM_DEFAULT_DEPTH_RGBA8888
+
+MSM framebuffer logo:
+	- drivers/video/logo/msm_logo.c
+	- configs:
+		FB_MSM_LOGO
+
+MDP display hardware driver:
+	- drivers/video/fbdev/mdp/*
+	- include/video/mdp/*
+	- configs:
+		FB_MSM_MDP_HW
+		FB_MSM_MDP40
+		FB_MSM_OVERLAY
+		FB_MSM_NO_MDP_PIPE_CTRL
+		FB_MSM_TVOUT_NONE
+
+S6E63M0 WVGA screen driver:
+	- drivers/video/fbdev/mdp/lcdc*
+	- configs:
+		FB_MSM_LCDC
+		FB_MSM_LCDC_HW
+		FB_MSM_LCDC_PANEL
+		FB_MSM_LCDC_S6E63M0_WVGA
+		FB_MSM_LCDC_S6E63M0_WVGA_PANEL
+
+MSM video core (codec):
+	- drivers/video/msm_vidc/*
+	- include/video/msm/*
+	- configs:
+		MSM_VIDC
+		MSM_VIDC_720P
+		MSM_VIDC_VENC
+		MSM_VIDC_VDEC
+
+MSM SoC ALSA driver:
+	- sound/soc/msm/*
+	- configs:
+		SND_MSM_SOC
+		SND_MSM7KV2_SOC
+		SND_MVS_SOC
+
+Usb and OTG driver:
+	- drivers/usb/phy/phy-msm72k-otg.c
+	- drivers/usb/gadget/udc/msm72k_udc.c
+	- drivers/usb/host/ehci-msm72k.c
+	- configs:
+		USB_MSM_72K
+		USB_EHCI_MSM_72K
+		USB_MSM_OTG_72K
+		USB_MSM_OTG_72K_ALLOW_BUS_OVERDRAW
+		USB_MSM_ACA
+		USB_MSM_STANDARD_ACA
+
+MSM rtc clock:
+	- drivers/rtc/rtc-msm.c
+	- configs:
+		RTC_DRV_MSM
+		RTC_SECURE_TIME_SUPPORT
+
+I2C MSM and I2C SSBI driver:
+	- drivers/i2c/busses/i2c-[msm,ssbi].c
+	- configs:
+		I2C_MSM
+		I2C_SSBI
+=================================== Patches ====================================
+
+IRQ read_line support (see commit 3dba1b5e74d02b0d5751800b935cfd58fc3a9e62)
+for PMIC8058 driver
+
+drivers/tty/serial: SERIAL_MSM_CLOCK_CONTROL config support
+(see commit fea59b6fee367dc8c4c6e4dd59cab4258f3bbedc)
+
+drivers/bluetooth: SERIAL_MSM_HS config support
+(see commit fea59b6fee367dc8c4c6e4dd59cab4258f3bbedc)
+
+drivers/staging/android/ion: Support for ION IOMMU mapping and (un)securing
+a heap. Needed for the MDP driver.
+(see commit cee3b100a9246607df218f6fd02845302e54c229)
+
+Includes (added: A, modified: M) (for MSM framebuffer device)
+	- A include/linux/sync.h
+	- A include/linux/sw_sync.h
+	- A include/linux/switch.h
+	- M arch/arm/include/asm/pgtable.h
